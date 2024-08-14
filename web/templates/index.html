@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
+
+
+    <title>Analisis Harga Gabah</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+          <a class="navbar-brand" href="#">Analisis Harga Gabah</a>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="#">Home</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">Features</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">Pricing</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="#">Contact</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    <div class="container-fluid">
+
+        <h4>Grafik</h4>
+        <div id="plotly-chart" class="mt-4"></div>
+      <h4>Tabel</h4>
+
+      <!-- Tabel Harga dan Prediksi -->
+      <div class="table-responsive mt-4">
+        <table class="table table-bordered">
+          <thead class="thead-dark">
+            <tr>
+              <th scope="col">Tanggal</th>
+              <th scope="col">Terakhir</th>
+              <th scope="col">Pembukaan</th>
+              <th scope="col">Tertinggi</th>
+              <th scope="col">Terendah</th>
+              <th scope="col">MA</th>
+              <th scope="col">ARIMA</th>
+              <th scope="col">SARIMA</th>
+              <th scope="col">SARIMAX</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in tables %}
+            <tr>
+              <td>{{ row['Tanggal'] }}</td>
+              <td>{{ row['Terakhir'] }}</td>
+              <td>{{ row['Pembukaan'] }}</td>
+              <td>{{ row['Tertinggi'] }}</td>
+              <td>{{ row['Terendah'] }}</td>
+              <td>{{ row['MA'] }}</td>
+              <td>{{ row['ARIMA'] }}</td>
+              <td>{{ row['SARIMA'] }}</td>
+              <td>{{ row['SARIMAX'] }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Grafik -->
+      
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Plotly JS -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script>
+      var plotlyData = {{ graph_json|safe }};
+      Plotly.newPlot('plotly-chart', plotlyData);
+    </script>
+    <script>
+  // Fungsi untuk memformat angka menjadi Rupiah
+  function formatRupiah(angka) {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(angka);
+}
+
+  // Fungsi untuk memformat tanggal menjadi short date (dd/mm/yyyy)
+  function formatTanggal(tanggal) {
+      let dateObj = new Date(tanggal);
+      let day = ('0' + dateObj.getDate()).slice(-2);
+      let month = ('0' + (dateObj.getMonth() + 1)).slice(-2);
+      let year = dateObj.getFullYear();
+      return day + '/' + month + '/' + year;
+  }
+
+  // Mengaplikasikan format pada tabel setelah halaman dimuat
+  document.addEventListener('DOMContentLoaded', function() {
+      let rows = document.querySelectorAll('.table tbody tr');
+      rows.forEach(function(row) {
+          let tanggalCell = row.querySelector('td:nth-child(1)');
+          let terakhirCell = row.querySelector('td:nth-child(2)');
+          let pembukaanCell = row.querySelector('td:nth-child(3)');
+          let tertinggiCell = row.querySelector('td:nth-child(4)');
+          let terendahCell = row.querySelector('td:nth-child(5)');
+          let maCell = row.querySelector('td:nth-child(6)');
+          let arimaCell = row.querySelector('td:nth-child(7)');
+          let sarimaCell = row.querySelector('td:nth-child(8)');
+          let sarimaxCell = row.querySelector('td:nth-child(9)');
+
+          // Format tanggal
+          tanggalCell.textContent = formatTanggal(tanggalCell.textContent);
+
+          // Format harga menjadi Rupiah
+          terakhirCell.textContent = formatRupiah(terakhirCell.textContent);
+          pembukaanCell.textContent = formatRupiah(pembukaanCell.textContent);
+          tertinggiCell.textContent = formatRupiah(tertinggiCell.textContent);
+          terendahCell.textContent = formatRupiah(terendahCell.textContent);
+          maCell.textContent = maCell.textContent !== 'N/A' ? formatRupiah(maCell.textContent) : 'N/A';
+          arimaCell.textContent = formatRupiah(arimaCell.textContent);
+          sarimaCell.textContent = formatRupiah(sarimaCell.textContent);
+          sarimaxCell.textContent = formatRupiah(sarimaxCell.textContent);
+      });
+  });
+</script>
+
+  </body>
+</html>
