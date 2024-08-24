@@ -4,77 +4,275 @@
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}">
-
-
     <title>Analisis Harga Gabah</title>
   </head>
   <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-        <div class="container-fluid">
-          <a class="navbar-brand" href="#">Analisis Harga Gabah</a>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ml-auto">
-              <li class="nav-item">
-                <a class="nav-link active" aria-current="page" href="#">Home</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">Features</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">Pricing</a>
-              </li>
-              <li class="nav-item">
-                <a class="nav-link" href="#">Contact</a>
-              </li>
-            </ul>
-          </div>
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">Analisis Harga Gabah</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="#">Home</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('open_prediction_excel') }}" >Open Prediction Excel</a>
+
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="{{ url_for('open_csv_data') }}" >Open CSV Data</a>
+
+            </li>
+           
+            <li class="nav-item">
+              <a  class="nav-link" href="#" data-toggle="modal" data-target="#adfModal">ADF Test Results</a>
+            </li>
+          </ul>
         </div>
-      </nav>
-    <div class="container-fluid">
+      </div>
+    </nav>
 
-        <h4>Grafik</h4>
-        <div id="plotly-chart" class="mt-4"></div>
-      <h4>Tabel</h4>
+    <div class="container-fluid mt-4">
+      <!-- Nav tabs -->
+      <ul class="nav nav-tabs" id="predictionTabs" role="tablist">
+        <li class="nav-item">
+          <a class="nav-link active" id="all-tab" data-toggle="tab" href="#all" role="tab" aria-controls="all" aria-selected="true">Hasil Prediksi Keseluruhan</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" id="arima-tab" data-toggle="tab" href="#arima" role="tab" aria-controls="arima" aria-selected="false">ARIMA</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" id="sarima-tab" data-toggle="tab" href="#sarima" role="tab" aria-controls="sarima" aria-selected="false">SARIMA</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" id="sarimax-tab" data-toggle="tab" href="#sarimax" role="tab" aria-controls="sarimax" aria-selected="false">SARIMAX</a>
+        </li>
+      </ul>
 
-      <!-- Tabel Harga dan Prediksi -->
-      <div class="table-responsive mt-4">
-        <table class="table table-bordered">
-          <thead class="thead-dark">
+      <!-- Tab content -->
+      <div class="tab-content mt-4" id="predictionTabContent">
+        
+        <!-- Tab 1: Hasil Prediksi Keseluruhan -->
+        <div class="tab-pane fade show active" id="all" role="tabpanel" aria-labelledby="all-tab">
+          <h4>Grafik Hasil Prediksi Keseluruhan</h4>
+          <div id="all-chart" class="mt-4"></div>
+          <!-- Tabel Harga dan Prediksi -->
+          <h4 class="mt-4">Tabel Harga dan Prediksi</h4>
+          <div class="table-responsive mt-4">
+              <table class="table table-bordered">
+                  <thead class="thead-dark">
+                      <tr>
+                          <th scope="col">Tanggal</th>
+                          <th scope="col">Harga Close</th>
+                          <th scope="col">Harga Open</th>
+                          <th scope="col">Harga High</th>
+                          <th scope="col">Harga Low</th>
+                          <th scope="col">MA</th>
+                          <th scope="col">ARIMA</th>
+                          <th scope="col">SARIMA</th>
+                          <th scope="col">SARIMAX</th>
+                          <th scope="col">Curah Hujan</th>
+                          <th scope="col">Jumlah Produksi</th>
+                      </tr>
+                  </thead>
+                  <tbody>
+                      {% for row in tables %}
+                      <tr>
+                          <td>{{ row['Tanggal'] }}</td>
+                          <td>{{ row['Terakhir'] | rupiah }}</td>
+                          <td>{{ row['Pembukaan'] | rupiah }}</td>
+                          <td>{{ row['Tertinggi'] | rupiah }}</td>
+                          <td>{{ row['Terendah'] | rupiah }}</td>
+                          <td>{{ row['MA'] | rupiah }}</td>
+                          <td>{{ row['ARIMA'] | rupiah }}</td>
+                          <td>{{ row['SARIMA'] | rupiah }}</td>
+                          <td>{{ row['SARIMAX'] | rupiah }}</td>
+                          <td>
+                            {% if row['Curah Hujan'] is number %}
+                                {{ row['Curah Hujan'] | round(2) }}
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        
+                        <td>
+                          {% if row['Jumlah Produksi'] is number %}
+                              {{ row['Jumlah Produksi'] | round(2) }}
+                          {% else %}
+                              N/A
+                          {% endif %}
+                      </td>
+                      
+                      </tr>
+                      {% endfor %}
+                  </tbody>
+              </table>
+          </div>
+          
+        </div>
+
+        <!-- Tab 2: ARIMA -->
+        <div class="tab-pane fade" id="arima" role="tabpanel" aria-labelledby="arima-tab">
+          <h4>Grafik Hasil Prediksi ARIMA</h4>
+          <div id="arima-chart" class="mt-4"></div>
+          <h4 class="mt-4">Perbandingan ARIMA</h4>
+<div class="table-responsive mt-4">
+    <table class="table table-bordered">
+        <thead class="thead-dark">
             <tr>
-              <th scope="col">Tanggal</th>
-              <th scope="col">Terakhir</th>
-              <th scope="col">Pembukaan</th>
-              <th scope="col">Tertinggi</th>
-              <th scope="col">Terendah</th>
-              <th scope="col">MA</th>
-              <th scope="col">ARIMA</th>
-              <th scope="col">SARIMA</th>
-              <th scope="col">SARIMAX</th>
+                <th scope="col">Tanggal</th>
+                <th scope="col">Harga Close</th>
+                <th scope="col">Prediksi ARIMA</th>
+                <th scope="col">Selisih Prediksi</th>
+                <th scope="col">Persentase Selisih</th>
+                <th scope="col">Status</th>
             </tr>
-          </thead>
-          <tbody>
+        </thead>
+        <tbody>
             {% for row in tables %}
             <tr>
-              <td>{{ row['Tanggal'] }}</td>
-              <td>{{ row['Terakhir'] }}</td>
-              <td>{{ row['Pembukaan'] }}</td>
-              <td>{{ row['Tertinggi'] }}</td>
-              <td>{{ row['Terendah'] }}</td>
-              <td>{{ row['MA'] }}</td>
-              <td>{{ row['ARIMA'] }}</td>
-              <td>{{ row['SARIMA'] }}</td>
-              <td>{{ row['SARIMAX'] }}</td>
+                <td>{{ row['Tanggal'] }}</td>
+                <td>{{ row['Terakhir'] | rupiah }}</td>
+                <td>{{ row['ARIMA'] | rupiah }}</td>
+                <td>{{ (row['Terakhir'] - row['ARIMA']) | rupiah }}</td>
+                <td>
+                    {% if row['ARIMA'] != 0 %}
+                        {{ (((row['Terakhir'] - row['ARIMA']) / row['ARIMA']) * 100) | round(2) }}%
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <td>
+                    {% if row['Terakhir'] - row['ARIMA'] > 0 %}
+                        Naik
+                    {% else %}
+                        Turun
+                    {% endif %}
+                </td>
             </tr>
             {% endfor %}
-          </tbody>
-        </table>
-      </div>
+        </tbody>
+    </table>
+</div>
+        </div>
 
-      <!-- Grafik -->
-      
+        <!-- Tab 3: SARIMA -->
+        <div class="tab-pane fade" id="sarima" role="tabpanel" aria-labelledby="sarima-tab">
+          <h4>Grafik Hasil Prediksi SARIMA</h4>
+          <div id="sarima-chart" class="mt-4"></div>
+          <!-- Tabel Perbandingan SARIMA -->
+<h4 class="mt-4">Perbandingan SARIMA</h4>
+<div class="table-responsive mt-4">
+    <table class="table table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Tanggal</th>
+                <th scope="col">Harga Close</th>
+                <th scope="col">Prediksi SARIMA</th>
+                <th scope="col">Selisih Prediksi</th>
+                <th scope="col">Persentase Selisih</th>
+                <th scope="col">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in tables %}
+            <tr>
+                <td>{{ row['Tanggal'] }}</td>
+                <td>{{ row['Terakhir'] | rupiah }}</td>
+                <td>{{ row['SARIMA'] | rupiah }}</td>
+                <td>{{ (row['Terakhir'] - row['SARIMA']) | rupiah }}</td>
+                <td>
+                    {% if row['SARIMA'] != 0 %}
+                        {{ (((row['Terakhir'] - row['SARIMA']) / row['SARIMA']) * 100) | round(2) }}%
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <td>
+                    {% if row['Terakhir'] - row['SARIMA'] > 0 %}
+                        Naik
+                    {% else %}
+                        Turun
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+        </div>
+
+        <!-- Tab 4: SARIMAX -->
+        <div class="tab-pane fade" id="sarimax" role="tabpanel" aria-labelledby="sarimax-tab">
+          <h4>Grafik Hasil Prediksi SARIMAX</h4>
+          <div id="sarimax-chart" class="mt-4"></div>
+          <!-- Tabel Perbandingan SARIMAX -->
+<h4 class="mt-4">Perbandingan SARIMAX</h4>
+<div class="table-responsive mt-4">
+    <table class="table table-bordered">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">Tanggal</th>
+                <th scope="col">Harga Close</th>
+                <th scope="col">Prediksi SARIMAX</th>
+                <th scope="col">Selisih Prediksi</th>
+                <th scope="col">Persentase Selisih</th>
+                <th scope="col">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in tables %}
+            <tr>
+                <td>{{ row['Tanggal'] }}</td>
+                <td>{{ row['Terakhir'] | rupiah }}</td>
+                <td>{{ row['SARIMAX'] | rupiah }}</td>
+                <td>{{ (row['Terakhir'] - row['SARIMAX']) | rupiah }}</td>
+                <td>
+                    {% if row['SARIMAX'] != 0 %}
+                        {{ (((row['Terakhir'] - row['SARIMAX']) / row['SARIMAX']) * 100) | round(2) }}%
+                    {% else %}
+                        N/A
+                    {% endif %}
+                </td>
+                <td>
+                    {% if row['Terakhir'] - row['SARIMAX'] > 0 %}
+                        Naik
+                    {% else %}
+                        Turun
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Modal for ADF Test Results -->
+    <div class="modal fade" id="adfModal" tabindex="-1" aria-labelledby="adfModalLabel" aria-hidden="true">
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="adfModalLabel">ADF Test Results</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <textarea class="form-control" rows="15" readonly>{{ adf_results }}</textarea>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js"></script>
@@ -82,54 +280,36 @@
 
     <!-- Plotly JS -->
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+
+    <!-- Plotly JS and Tab Navigation -->
     <script>
-      var plotlyData = {{ graph_json|safe }};
-      Plotly.newPlot('plotly-chart', plotlyData);
-    </script>
-    <script>
-  // Fungsi untuk memformat angka menjadi Rupiah
-  function formatRupiah(angka) {
-    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(angka);
-}
+      // Function to plot the chart when a tab becomes active
+      function plotChart(containerId, graphData) {
+        Plotly.newPlot(containerId, graphData);
+      }
 
-  // Fungsi untuk memformat tanggal menjadi short date (dd/mm/yyyy)
-  function formatTanggal(tanggal) {
-      let dateObj = new Date(tanggal);
-      let day = ('0' + dateObj.getDate()).slice(-2);
-      let month = ('0' + (dateObj.getMonth() + 1)).slice(-2);
-      let year = dateObj.getFullYear();
-      return day + '/' + month + '/' + year;
-  }
+      // Event listener to trigger the plotting of the graphs
+      $(document).ready(function () {
+        // Plot the chart for the initially active tab (Hasil Prediksi Keseluruhan)
+        var allPlotData = {{ all_graph_json|safe }};
+        plotChart('all-chart', allPlotData);
 
-  // Mengaplikasikan format pada tabel setelah halaman dimuat
-  document.addEventListener('DOMContentLoaded', function() {
-      let rows = document.querySelectorAll('.table tbody tr');
-      rows.forEach(function(row) {
-          let tanggalCell = row.querySelector('td:nth-child(1)');
-          let terakhirCell = row.querySelector('td:nth-child(2)');
-          let pembukaanCell = row.querySelector('td:nth-child(3)');
-          let tertinggiCell = row.querySelector('td:nth-child(4)');
-          let terendahCell = row.querySelector('td:nth-child(5)');
-          let maCell = row.querySelector('td:nth-child(6)');
-          let arimaCell = row.querySelector('td:nth-child(7)');
-          let sarimaCell = row.querySelector('td:nth-child(8)');
-          let sarimaxCell = row.querySelector('td:nth-child(9)');
+        // Event listeners for each tab to render the corresponding charts
+        $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+          var target = $(e.target).attr("href"); // Get the target tab
 
-          // Format tanggal
-          tanggalCell.textContent = formatTanggal(tanggalCell.textContent);
-
-          // Format harga menjadi Rupiah
-          terakhirCell.textContent = formatRupiah(terakhirCell.textContent);
-          pembukaanCell.textContent = formatRupiah(pembukaanCell.textContent);
-          tertinggiCell.textContent = formatRupiah(tertinggiCell.textContent);
-          terendahCell.textContent = formatRupiah(terendahCell.textContent);
-          maCell.textContent = maCell.textContent !== 'N/A' ? formatRupiah(maCell.textContent) : 'N/A';
-          arimaCell.textContent = formatRupiah(arimaCell.textContent);
-          sarimaCell.textContent = formatRupiah(sarimaCell.textContent);
-          sarimaxCell.textContent = formatRupiah(sarimaxCell.textContent);
+          if (target === "#arima") {
+            var arimaPlotData = {{ arima_graph_json|safe }};
+            plotChart('arima-chart', arimaPlotData);
+          } else if (target === "#sarima") {
+            var sarimaPlotData = {{ sarima_graph_json|safe }};
+            plotChart('sarima-chart', sarimaPlotData);
+          } else if (target === "#sarimax") {
+            var sarimaxPlotData = {{ sarimax_graph_json|safe }};
+            plotChart('sarimax-chart', sarimaxPlotData);
+          }
+        });
       });
-  });
-</script>
-
+    </script>
   </body>
 </html>
