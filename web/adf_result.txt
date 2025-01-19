@@ -1,5 +1,5 @@
-ADF Statistic: -1.491498866548732
-p-value: 0.5377124580676669
+ADF Statistic: -1.4914988665487245
+p-value: 0.5377124580676707
 Used Lag: 26
 Number of Observations: 1886
 Critical Values:
